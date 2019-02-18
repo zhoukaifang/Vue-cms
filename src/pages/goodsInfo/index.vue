@@ -87,6 +87,12 @@ export default {
     },
     addToShopCar() {
       this.ballFlag = !this.ballFlag;
+      this.$store.commit("addToCar", {
+        id: this.goodsinfo.id,
+        count: this.buyCount,
+        price: this.goodsinfo.sell_price,
+        selected: true
+      });
     },
     filterMaxCount() {
       if (this.buyCount > this.goodsinfo.stock_quantity) {

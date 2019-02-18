@@ -1,21 +1,30 @@
 <template>
-  <div class="goods-list">
-    <div class="goods-item" v-for="item in goodslist" :key="item.id" @click="goDetail(item.id)">
-      <img :src="item.img_url">
-      <h1 class="title">{{item.title}}</h1>
-      <div class="info">
-        <p class="price">
-          <span class="now">￥{{item.sell_price}}</span>
-          <span class="old">￥{{item.market_price}}</span>
-        </p>
-        <p class="sell">
-          <span>热卖中</span>
-          <span>剩{{item.stock_quantity}}件</span>
-        </p>
+  <scroller
+    refreshLayerColor="darkorange"
+    loadingLayerColor="darkorange"
+    ref="sc"
+    refreshText="用力点拉~~"
+    noDataText="客官冒得了~~"
+    :on-refresh="refresh"
+    :on-infinite="infinite"
+  >
+    <div class="goods-list">
+      <div class="goods-item" v-for="item in goodslist" :key="item.id" @click="goDetail(item.id)">
+        <img :src="item.img_url">
+        <h1 class="title">{{item.title}}</h1>
+        <div class="info">
+          <p class="price">
+            <span class="now">￥{{item.sell_price}}</span>
+            <span class="old">￥{{item.market_price}}</span>
+          </p>
+          <p class="sell">
+            <span>热卖中</span>
+            <span>剩{{item.stock_quantity}}件</span>
+          </p>
+        </div>
       </div>
     </div>
-    <mt-button type="danger" size="large" @click="getMore">加载更多</mt-button>
-  </div>
+  </scroller>
 </template>
 <script>
 export default {
@@ -29,23 +38,43 @@ export default {
     this.getGoodsList();
   },
   methods: {
-    getGoodsList() {
-      this.$http.get("getgoods?pageindex=" + this.pageindex).then(result => {
-        // this.goodslist = result.body.message;
-        this.goodslist = this.goodslist.concat(result.body.message);
-      });
+    getGoodsList(refresh) {
+      return this.$http
+        .get("getgoods?pageindex=" + this.pageindex)
+        .then(result => {
+          if (refresh) {
+            this.goodslist = result.body.message;
+          } else {
+            this.goodslist = this.goodslist.concat(result.body.message);
+          }
+        });
     },
     goDetail(id) {
       this.$router.push("/home/goodsInfo/" + id);
     },
-    getMore() {
-      this.pageindex++;
-      this.getGoodsList();
+
+    refresh() {
+      this.pageindex = 1;
+      this.getGoodsList(true).then(() => {
+        this.$refs.sc.finishPullToRefresh();
+      });
+    },
+    infinite() {
+      setInterval(() => {
+        this.pageindex++;
+        this.getGoodsList().then(() => {
+          this.$refs.sc.finishInfinite(this.goodslist.length >= 15);
+        });
+      }, 2000);
     }
   }
 };
 </script>
-<style lang="less" scoped>
+<style lang="less">
+._v-content {
+  padding-top: 40px;
+  padding-bottom: 50px;
+}
 .goods-list {
   display: flex;
   flex-wrap: wrap;

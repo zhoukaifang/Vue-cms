@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <mt-header fixed title="前端高端项目"></mt-header>
+    <mt-header fixed title="前端高端项目">
+      <mt-button v-show="hasBackBtn" slot="left" icon="back" @click="$router.go(-1)">返回</mt-button>
+    </mt-header>
     <transition name="app">
       <router-view/>
     </transition>
@@ -15,7 +17,7 @@
       </router-link>
       <router-link class="mui-tab-item1" to="/shopcar">
         <span class="mui-icon mui-icon-extra mui-icon-extra-cart">
-          <span class="mui-badge" id="badge">0</span>
+          <span class="mui-badge" id="badge">{{$store.getters.totalCount}}</span>
         </span>
         <span class="mui-tab-label">购物车</span>
       </router-link>
@@ -29,7 +31,17 @@
 
 <script>
 export default {
-  name: "App"
+  name: "App",
+  data() {
+    return {
+      hasBackBtn: this.$route.path !== "/home"
+    };
+  },
+  watch: {
+    $route(to, from) {
+      this.hasBackBtn = to.path !== "/home";
+    }
+  }
 };
 </script>
 
