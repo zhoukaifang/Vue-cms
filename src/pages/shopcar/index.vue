@@ -2,10 +2,13 @@
   <div class="shopcar-container">
     <div class="goods-list">
       <!-- 商品列表项区域 -->
-      <div class="mui-card" v-for="(item) in goodslist" :key="item.id">
+      <div class="mui-card" v-for="(item,i) in goodslist" :key="item.id">
         <div class="mui-card-content">
           <div class="mui-card-content-inner">
-            <mt-switch></mt-switch>
+            <mt-switch
+              @change="goodsStateChanged(item.id,$store.getters.goodsSelected[item.id])"
+              :value="$store.getters.goodsSelected[item.id]"
+            ></mt-switch>
             <img :src="item.thumb_path">
             <div class="info">
               <h1>{{ item.title }}</h1>
@@ -18,7 +21,7 @@
                   <input v-model="goodsCount[item.id]" type="number">
                   <input @click="increment(item.id)" type="button" value="+">
                 </div>
-                <a href="#">删除</a>
+                <a href="#" @click.prevent="remove(item.id,i)">删除</a>
               </div>
             </div>
           </div>
@@ -27,7 +30,7 @@
     </div>
 
     <!-- 结算区域 -->
-    <!-- <div class="mui-card">
+    <div class="mui-card">
       <div class="mui-card-content">
         <div class="mui-card-content-inner jiesuan">
           <div class="left">
@@ -41,7 +44,7 @@
           <mt-button type="danger">去结算</mt-button>
         </div>
       </div>
-    </div>-->
+    </div>
   </div>
 </template>
 
@@ -65,6 +68,22 @@ export default {
       this.$http.get("goods/getshopcarlist/" + idArr.join(",")).then(result => {
         this.goodslist = result.body.message;
       });
+    },
+    goodsStateChanged(id, selected) {
+      console.log(id, selected);
+      this.$store.commit("updateSelected", { id, selected });
+    },
+    subtract(id) {
+      this.goodsCount[id] > 1 && this.goodsCount[id]--;
+      this.$store.commit("updateCount", { id, count: this.goodsCount[id] });
+    },
+    increment(id) {
+      this.goodsCount[id]++;
+      this.$store.commit("updateCount", { id, count: this.goodsCount[id] });
+    },
+    remove(id, i) {
+      this.goodslist.splice(i, 1);
+      this.$store.commit("removeFromCar", id);
     }
   }
 };

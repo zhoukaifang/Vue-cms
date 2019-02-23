@@ -46,6 +46,33 @@ let store = new Vuex.Store({
         state.car[index].count += parseInt(goodsInfo.count)
       }
       localStorage.setItem("car", JSON.stringify(state.car))
+    },
+    updateSelected(state, goodsInfo) {
+      state.car.some(item => {
+        if (item.id == goodsInfo.id) {
+          item.selected = !goodsInfo.selected
+          return true
+        }
+      })
+      localStorage.setItem('car', JSON.stringify(state.car))
+    },
+    updateCount(state, goodsInfo) {
+      state.car.some(item => {
+        if (item.id == goodsInfo.id) {
+          item.count = goodsInfo.count
+          return true
+        }
+      })
+      localStorage.setItem('car', JSON.stringify(state.car))
+    },
+    removeFromCar(state, id) {
+      state.car.some((item, i) => {
+        if (item.id == id) {
+          state.car.splice(i, 1)
+          return true
+        }
+      })
+      localStorage.setItem('car', JSON.stringify(state.car))
     }
   },
   getters: {
@@ -58,6 +85,26 @@ let store = new Vuex.Store({
       let o = {}
       state.car.forEach(item => {
         o[item.id] = item.count
+      })
+      return o
+    },
+    goodsSelected(state) {
+      let o = {}
+      state.car.forEach(item => {
+        o[item.id] = item.selected
+      })
+      return o
+    },
+    goodsCountAndAmount(state) {
+      let o = {
+        count: 0,
+        amount: 0
+      }
+      state.car.forEach(item => {
+        if (item.selected) {
+          o.count += item.count
+          o.amount += item.price * item.count
+        }
       })
       return o
     }
